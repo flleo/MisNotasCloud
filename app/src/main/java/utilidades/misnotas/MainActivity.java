@@ -30,14 +30,14 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 
-            LocalData localData = new LocalData(getApplicationContext());
+        /*    LocalData localData = new LocalData(getApplicationContext());
             if(!localData.getString(USER_ID).equals("")){}
             else {
                 Intent mailIntent = new Intent(MainActivity.this, EmailAuthenticationActivity.class);
                 startActivity(mailIntent);
                 finish();
             }
-
+*/
     }
 
 
