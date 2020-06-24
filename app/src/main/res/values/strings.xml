@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">MisNotasCloud</string>
+    <!-- menu_main -->
+    <string name="action_salir">Cerrar sesion</string>
+    <!-- AlertDialog Borrar-->
+    <string name="titleborrar">¿Seguro que desea borrar, la nota?</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="lista_fragment_label">Lista Fragment</string>
+    <string name="nota_fragment_label">Nota Fragment</string>
+    <!-- Buttons -->
+    <string name="next">Next</string>
+    <string name="nueva_nota">Nueva Nota</string>
+    <string name="lista">Mis Notas</string>
+    <string name="mis_notas">Mis notas</string>
+    <string name="enviarB">Enviar</string>
+    <string name="accesoMisNotas">Accede a MisNotas</string>
+    <!-- Strings related to login -->
+    <string name="prompt_email">Ingrese su e-mail</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="welcome">"Welcome!"</string>
+    <!-- Nota -->
+    <string name="contenido">Contenido</string>
+    <string name="titulo">Titulo</string>
+    <string name="compartir">¿Por qué medio deseas compartir?</string>
+
+
+</resources>

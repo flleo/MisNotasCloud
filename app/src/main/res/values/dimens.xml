@@ -1,0 +1,18 @@
+<resources>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="margenConCabecero">60dp</dimen>
+    <dimen name="margenInferiorConBoton">80dp</dimen>
+    <dimen name="fab_padding">10dp</dimen>
+    <dimen name="centrado">100dp</dimen>
+    <dimen name="centradoWidget">200dp</dimen>
+    <dimen name="centradoHWidget">160dp</dimen>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="fragment_horizontal_margin">16dp</dimen>
+    <dimen name="fragment_vertical_margin">16dp</dimen>
+
+    <!--
+Refer to App Widget Documentation for margin information
+http://developer.android.com/guide/topics/appwidgets/index.html#CreatingLayout
+    -->
+    <dimen name="widget_margin">8dp</dimen>
+</resources>

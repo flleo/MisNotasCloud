@@ -1,0 +1,6 @@
+Firebase:
+
+El certificado sha1 de desarrollo lo obtengo:
+"C:\Program Files\Java\jdk-14\bin\keytool" -list -v -keystore "%USERPROFILE%\.android\debug.keystore" -alias androiddebugkey -storepass android -keypass android
+Ya viene asignado con la instalacion de android , creo yo, porque si le cambias el -storepass y el -keypass, no te lo da.
+
