@@ -3,6 +3,7 @@ package utilidades.misnotas.fragment;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,8 +24,9 @@ import utilidades.misnotas.persistence.sqlite.NotasDbHelper;
 import utilidades.misnotas.utils.EncriptaDesencriptaAES;
 import utilidades.misnotas.utils.KeyboardUtil;
 import utilidades.misnotas.utils.LocalData;
+
+import static utilidades.misnotas.R.layout.fragment_nota;
 import static utilidades.misnotas.utils.LocalData.USER_ID;
-import static utilidades.misnotas.R.layout.*;
 
 public class NotaFragment extends Fragment {
 
@@ -39,7 +41,6 @@ public class NotaFragment extends Fragment {
     NotasDbHelper notasDbHelper;
     Nota nota = new Nota();
     ListaFragment mFragment;
-
 
 
     @Override
@@ -65,7 +66,7 @@ public class NotaFragment extends Fragment {
         //Si hay datos los recogemos
         bundle = this.getArguments();
         if (bundle != null) {
-            nota.set_id(bundle.getInt("_id"));
+            nota.setId(bundle.getString("id"));
             nota.setUser_id(bundle.getString("user_id"));
             tituloET.setText(bundle.getString("titulo"));
             contenidoET.setText(bundle.getString("contenido"));
@@ -77,29 +78,29 @@ public class NotaFragment extends Fragment {
             @RequiresApi(api = Build.VERSION_CODES.Q)
             @Override
             public void onClick(View view) {
-                String titulo1 = tituloET.getText().toString();
-                String contenido2 = contenidoET.getText().toString();
-                if(titulo1.length() > 0 || contenido2.length() > 0){
+                String titulo1 = tituloET.getText().toString().trim();
+                String contenido2 = contenidoET.getText().toString().trim();
+                if (titulo1.length() > 0 || contenido2.length() > 0) {
                     KeyboardUtil.hideSoftKeyboard(getActivity());
                     nota.setTitulo(primaraMayuscula(titulo1));
                     nota.setContenido(primaraMayuscula(contenido2));
                     Nota notaE = encriptaDesencriptaAES.encriptacionAES(nota);
                     if (bundle != null) {
                         //Actualizamos
-                        if (notasDbHelper.update(nota) == 1) {
+                        Log.e("actualizado id",String.valueOf(notaE.getId()));
+                            Firebase.update(notaE.getId(), notaE);
                             Snackbar.make(view, "La nota se actualizó", Snackbar.LENGTH_SHORT)
                                     .setAction("", null).show();
-                            Firebase.update(String.valueOf(notaE.get_id()), notaE);
-                        }
+
+                        //}
                     } else {
                         //Nueva nota
-                        long id;
-                        if ((id=notasDbHelper.save(nota)) != 0){
-                            Snackbar.make(view, "La nota fue añadida ", Snackbar.LENGTH_SHORT)
-                                    .setAction("", null).show();
-                            notaE.set_id((int) id);
-                            Firebase.update(String.valueOf(id),notaE);
-                        }
+                        String id;
+                            id = Firebase.push();
+                            notaE.setId(id);
+                            Firebase.update(id, notaE);
+                            Snackbar.make(view, "La nota fue añadida ", Snackbar.LENGTH_SHORT).setAction("", null).show();
+                     //   }
                     }
                 }
                 //Cambiamos a la vista listado
@@ -117,11 +118,9 @@ public class NotaFragment extends Fragment {
             titulo2 = String.valueOf(T).toUpperCase();
             for (int i = 1; i < titulo1.length(); i++)
                 titulo2 += titulo1.charAt(i);
-        } catch (StringIndexOutOfBoundsException u){}
-
+        } catch (StringIndexOutOfBoundsException u) {
+        }
         return titulo2;
     }
-
-
 
 }

@@ -25,10 +25,15 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/fondo"
-            android:drawSelectorOnTop="false" />
+            android:drawSelectorOnTop="false">
+
+
+        </ListView>
 
 
     </LinearLayout>
+
+
 
     <Button
         android:id="@+id/nuevaNotaB"

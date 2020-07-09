@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,7 +19,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
@@ -26,6 +27,8 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,8 +41,8 @@ import utilidades.misnotas.persistence.sqlite.NotasDbHelper;
 import utilidades.misnotas.utils.EncriptaDesencriptaAES;
 import utilidades.misnotas.utils.LocalData;
 
-import static utilidades.misnotas.utils.LocalData.USER_ID;
 import static utilidades.misnotas.utils.LocalData.TEMP_EMAIL_ID;
+import static utilidades.misnotas.utils.LocalData.USER_ID;
 
 public class ListaFragment extends Fragment {
     ArrayAdapter adaptador = null;
@@ -57,7 +60,6 @@ public class ListaFragment extends Fragment {
     private ArrayList<Nota> notasF = new ArrayList<>();
     AlertDialog _dialog;
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         listaFragment = this;
@@ -72,7 +74,6 @@ public class ListaFragment extends Fragment {
         //Recogemos las vistas
         notasLV = view.findViewById(R.id.notasLV);
         nuevaNotaB = view.findViewById(R.id.nuevaNotaB);
-
         user_id = localData.getString(USER_ID);
         email_id = localData.getString(TEMP_EMAIL_ID);
 
@@ -81,9 +82,52 @@ public class ListaFragment extends Fragment {
             Intent intent = new Intent(getActivity(), EmailAuthenticationActivity.class);
             startActivity(intent);
         } else {
+            notas = notasDbHelper.getAll(user_id);
             nota.setUser_id(user_id);
-            upload();
+
+
+            Firebase.databaseReference.orderByChild("user_id").equalTo(nota.getUser_id()).addChildEventListener(new ChildEventListener() {
+                @RequiresApi(api = Build.VERSION_CODES.O)
+                @Override
+                public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                    if (dataSnapshot.getValue() != null) {
+                        Nota nota = encriptaDesencriptaAES.desencriptaAES(dataSnapshot.getValue(Nota.class));
+                        notasDbHelper.save(nota);
+                        upload();
+
+                    }
+                }
+
+                @RequiresApi(api = Build.VERSION_CODES.O)
+                @Override
+                public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                    if (dataSnapshot.getValue() != null) {
+                        Nota nota = encriptaDesencriptaAES.desencriptaAES(dataSnapshot.getValue(Nota.class));
+                        notasDbHelper.update(nota);
+                        upload();
+
+                    }
+                }
+
+                @Override
+                public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+                    Log.e("ELIMINO", "ELIMINO " + dataSnapshot.getValue(Nota.class).getId());
+                    notasDbHelper.delete(dataSnapshot.getValue(Nota.class).getId());
+                    upload();
+
+                }
+
+                @Override
+                public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                }
+            });
+
         }
+
 
         //Llamamos nueva nota
         nuevaNotaB.setOnClickListener(new View.OnClickListener() {
@@ -105,7 +149,7 @@ public class ListaFragment extends Fragment {
                 try {
                     Nota nota = (Nota) notasLV.getItemAtPosition(position);
                     Bundle data = new Bundle();
-                    data.putInt("_id", nota.get_id());
+                    data.putString("id", nota.getId());
                     data.putString("user_id", nota.getUser_id());
                     data.putString("titulo", nota.getTitulo());
                     data.putString("contenido", notas.get(position).getContenido());
@@ -126,45 +170,10 @@ public class ListaFragment extends Fragment {
                 return true;
             }
         });
-    }
 
-    public void upload() {
-        notas = notasDbHelper.getAll(nota.getUser_id());
-        adaptador();
-        if (notas.size() == 0) {
-            notasF.clear();
-            activaSaveFirebase();
-            int i = 0;
-            if(notasF.size() > 0){
-                for(Nota n: notasF) {
-                    notasDbHelper.update(n);
-                    i++;
-                }
-                if(i == notasF.size())   upload();
-            }
-        }
-    }
-
-    private void activaSaveFirebase() {
-        Firebase.databaseReference.orderByChild("user_id").equalTo(nota.getUser_id()).addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                if (dataSnapshot.getValue() != null) {
-                    Nota nota = encriptaDesencriptaAES.desencriptaAES(dataSnapshot.getValue(Nota.class));
-                    notasF.add(nota);
-                }
-            }
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {}
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {}
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {}
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {}
-        });
 
     }
+
 
     private void borrarCompartir(Nota nota1, final View view) {
         final Nota nota = nota1;
@@ -178,7 +187,7 @@ public class ListaFragment extends Fragment {
                 .setMultiChoiceItems(campos, clickedItems, new DialogInterface.OnMultiChoiceClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                        if (isChecked){
+                        if (isChecked) {
                             _dialog.dismiss();
                             switch (which) {
                                 case 0:
@@ -188,12 +197,13 @@ public class ListaFragment extends Fragment {
                                             .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(DialogInterface dialog, int which) {
-                                                    if (notasDbHelper.delete(nota.get_id()) > 0) {
+                                                    // if (notasDbHelper.delete(nota.get_id()) > 0) {
+                                                    if (Firebase.removeId(nota.getId()) != null) {
                                                         Snackbar.make(getView(), "La nota ha sido eliminada", Snackbar.LENGTH_SHORT)
                                                                 .setAction("Action", null).show();
                                                         upload();
-                                                        Firebase.removeId(nota.get_id());
                                                     }
+                                                    //  }
                                                 }
                                             })
                                             .setNegativeButton("Cancel", null)
@@ -208,7 +218,7 @@ public class ListaFragment extends Fragment {
                                     //Ver si el dispositivo tiene alguna aplicacion de envio
                                     List<ResolveInfo> activities = getContext().getPackageManager().queryIntentActivities(intentE, PackageManager.MATCH_DEFAULT_ONLY);
                                     if (activities.size() > 0) {
-                                        startActivity(Intent.createChooser(intentE,"Enviar mediante:"));
+                                        startActivity(Intent.createChooser(intentE, "Enviar mediante:"));
                                     } else {
                                         Snackbar.make(getView(), "Debes tener una app, de envio de datos, en tu dispositivo", Snackbar.LENGTH_LONG)
                                                 .setAction("Action", null).show();
@@ -221,7 +231,10 @@ public class ListaFragment extends Fragment {
         _dialog = builder.show();
     }
 
-
+    public void upload() {
+        notas = notasDbHelper.getAll(user_id);
+        adaptador();
+    }
 
     private void adaptador() {
         adaptador = new ArrayAdapter(getContext(), android.R.layout.simple_list_item_2, android.R.id.text1, notas) {
@@ -243,10 +256,10 @@ public class ListaFragment extends Fragment {
     }
 
     private String contenido(int position) {
-        String contenido = (notas.get(position).getContenido().trim());
+        String contenido = (notas.get(position).getContenido());
         int size = contenido.length();
-        if(size > 100)
-            contenido = contenido.substring(0,100);
+        if (size > 100)
+            contenido = contenido.substring(0, 100);
 
         return (contenido);
     }

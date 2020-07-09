@@ -2,6 +2,7 @@ package utilidades.misnotas.persistence.sqlite;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
@@ -16,7 +17,7 @@ import static utilidades.misnotas.persistence.sqlite.NotasContract.*;
 
 public  class NotasDbHelper extends SQLiteOpenHelper {
 
-    public static final int DATABASE_VERSION = 17;
+    public static final int DATABASE_VERSION = 35;
     public  static final String DATABASE_NAME = "notas.db";
 
     public NotasDbHelper(@Nullable Context context) {
@@ -27,7 +28,8 @@ public  class NotasDbHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         //Create Table
         db.execSQL("CREATE TABLE " + NotaEntry.TABLE_NAME + " ("
-                + NotaEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + NotaEntry._ID + "  INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + NotaEntry.ID + " TEXT NOT NULL UNIQUE,"
         + NotaEntry.USER_ID + " TEXT NOT NULL,"
         + NotaEntry.TITULO + " TEXT NOT NULL,"
         + NotaEntry.CONTENIDO + " TEXT NOT NULL"
@@ -36,54 +38,59 @@ public  class NotasDbHelper extends SQLiteOpenHelper {
 
     }
 
-    @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + NotaEntry.TABLE_NAME);
-        onCreate(db);
-    }
 
-    public  long save(Nota nota) {
+
+    public  long save(Nota nota) throws SQLiteConstraintException {
         SQLiteDatabase sqLiteDatabase = getWritableDatabase();
         return sqLiteDatabase.insert(NotaEntry.TABLE_NAME,null, nota.toContentValues());
     }
 
     public int update(Nota nota) {
         SQLiteDatabase sqLiteDatabase = getWritableDatabase();
-        String[] id_ = {String.valueOf(nota.get_id())};
-        return sqLiteDatabase.update(NotaEntry.TABLE_NAME,nota.toContentValues(),"_id = ?", id_);
+        String[] ids = {nota.getId()};
+        return sqLiteDatabase.update(NotaEntry.TABLE_NAME,nota.toContentValues(),"id = ?", ids);
     }
 
-    public int delete(int _id) {
+    public int delete(String id) {
         SQLiteDatabase sqLiteDatabase = getWritableDatabase();
-        String[] id_ = {String.valueOf(_id)};
-        return sqLiteDatabase.delete(NotaEntry.TABLE_NAME,"_id = ?", id_);
+        String[] ids = {id};
+        return sqLiteDatabase.delete(NotaEntry.TABLE_NAME,"id = ?", ids);
     }
 
     public ArrayList<Nota> getAll(String user_id) {
         ArrayList<Nota> notas = new ArrayList<>();
         SQLiteDatabase sqLiteDatabase = getReadableDatabase();
-        String[] parametros = {NotaEntry._ID,NotaEntry.USER_ID,NotaEntry.TITULO,NotaEntry.CONTENIDO};
+        String[] parametros = {NotaEntry._ID,NotaEntry.ID,NotaEntry.USER_ID,NotaEntry.TITULO,NotaEntry.CONTENIDO};
         String whereClause = "user_id = ?";
         String[] tableColumns = new String[] {user_id};
         String orderBy = "titulo";
-        Cursor cursor = sqLiteDatabase.query(
-                NotaEntry.TABLE_NAME,
-                parametros, whereClause, tableColumns ,null, null, orderBy
-                );
-        if(cursor == null) Log.e("Sqlite:"," Error, al obtener el metodo getAll()");
-        if(!cursor.moveToFirst()) Log.d("Sqlite:", " No existen datos");
-        else
-        do {
-            Nota nota = new Nota(
-                    cursor.getInt(0),
-                    cursor.getString(1),
-                    cursor.getString(2),
-                    cursor.getString(3)
+        try {
+            Cursor cursor = sqLiteDatabase.query(
+                    NotaEntry.TABLE_NAME,
+                    parametros, whereClause, tableColumns ,null, null, orderBy
             );
-            notas.add(nota);
-        } while (cursor.moveToNext());
-        cursor.close();
+            if(cursor == null) Log.e("Sqlite:"," Error, al obtener el metodo getAll()");
+            if(!cursor.moveToFirst()) Log.d("Sqlite:", " No existen datos");
+            else
+                do {
+                    Nota nota = new Nota(
+                            cursor.getString(1),
+                            cursor.getString(2),
+                            cursor.getString(3),
+                            cursor.getString(4)
+                    );
+                    notas.add(nota);
+                } while (cursor.moveToNext());
+            cursor.close();
+        } catch (IllegalArgumentException e) {}
 
         return notas;
+    }
+
+
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        db.execSQL("DROP TABLE IF EXISTS " + NotaEntry.TABLE_NAME);
+        onCreate(db);
     }
 }

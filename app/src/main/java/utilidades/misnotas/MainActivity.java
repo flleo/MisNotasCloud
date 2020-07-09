@@ -3,18 +3,17 @@ package utilidades.misnotas;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
-
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
 
 import utilidades.misnotas.email.EmailAuthenticationActivity;
-import utilidades.misnotas.persistence.sqlite.NotasContract;
 import utilidades.misnotas.utils.LocalData;
 
 import static utilidades.misnotas.utils.LocalData.USER_ID;
@@ -22,22 +21,21 @@ import static utilidades.misnotas.utils.LocalData.USER_ID;
 public class MainActivity extends AppCompatActivity {
 
 
-
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @SuppressLint("ResourceType")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        LocalData localData = new LocalData(getApplicationContext());
+        if (!localData.getString(USER_ID).equals("")) {
+        } else {
+            Intent mailIntent = new Intent(MainActivity.this, EmailAuthenticationActivity.class);
+            startActivity(mailIntent);
+            finish();
+        }
 
-        /*    LocalData localData = new LocalData(getApplicationContext());
-            if(!localData.getString(USER_ID).equals("")){}
-            else {
-                Intent mailIntent = new Intent(MainActivity.this, EmailAuthenticationActivity.class);
-                startActivity(mailIntent);
-                finish();
-            }
-*/
     }
 
 
@@ -75,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     @Override
-    public void onBackPressed (){
+    public void onBackPressed() {
         //Nothing to do
     }
 
