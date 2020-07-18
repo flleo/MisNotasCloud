@@ -7,19 +7,21 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-
 import utilidades.misnotas.email.EmailAuthenticationActivity;
 import utilidades.misnotas.utils.LocalData;
-
 import static utilidades.misnotas.utils.LocalData.USER_ID;
+import static utilidades.misnotas.utils.LocalData.USER_IDs;
 
 public class MainActivity extends AppCompatActivity {
 
+
+    private static final String TAG = "MainActivity : ";
+    LocalData localData;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @SuppressLint("ResourceType")
@@ -27,17 +29,15 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        LocalData localData = new LocalData(getApplicationContext());
-        if (!localData.getString(USER_ID).equals("")) {
+        localData = new LocalData(getApplicationContext());
+        USER_ID = localData.getString(USER_IDs);
+        if (USER_ID != "") {
+            Log.e(USER_ID,"user");
         } else {
             Intent mailIntent = new Intent(MainActivity.this, EmailAuthenticationActivity.class);
             startActivity(mailIntent);
-            finish();
         }
-
     }
-
 
     //Menu
     @Override
@@ -55,12 +55,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_salir) {
             Intent intent = new Intent(this, EmailAuthenticationActivity.class);
             intent.putExtra("SALIR", "salir");

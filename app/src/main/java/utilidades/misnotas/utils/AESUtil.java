@@ -2,6 +2,7 @@ package utilidades.misnotas.utils;
 
 
 import android.os.Build;
+import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
@@ -58,6 +59,7 @@ public class AESUtil {
     public String decrypt(String ciphertext) {
         try {
             SecretKey key = generateKey(salt, passphrase);
+         //  System.out.println(ciphertext+"¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡")
             byte[] decrypted = doFinal(Cipher.DECRYPT_MODE, key, four, base64(ciphertext));
             return new String(decrypted, "UTF-8");
         } catch (UnsupportedEncodingException e) {

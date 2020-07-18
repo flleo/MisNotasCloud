@@ -11,10 +11,10 @@ public abstract class Firebase {
     private static String DATABASE = "notas";
     public static DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child(DATABASE);
     public static String push() {return  databaseReference.push().getKey();}
-    public static void update(String id,Nota nota) {
-        databaseReference.child(id).setValue(nota);
+    public static void update(Nota nota) {
+        databaseReference.child(nota.getUser_id()).child(nota.getId()).setValue(nota);
     }
-    public static Task<Void> removeId(String id) {return databaseReference.child(id).removeValue();}
+    public static Task<Void> removeId(Nota nota) {return databaseReference.child(nota.getUser_id()).child(nota.getId()).removeValue();}
 
 
 

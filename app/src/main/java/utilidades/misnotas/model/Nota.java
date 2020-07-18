@@ -7,12 +7,13 @@ import utilidades.misnotas.persistence.sqlite.NotasContract;
 public class Nota {
     private String id;
     private String user_id ;
-    private String titulo , contenido ;
+    private String titulo ;
+    private String contenido ;
 
     public Nota() {
     }
 
-    public Nota(String titulo, String contenido) {
+ /*   public Nota(String titulo, String contenido) {
         this.titulo = titulo;
         this.contenido = contenido;
     }
@@ -21,7 +22,7 @@ public class Nota {
         this.user_id = user_id;
         this.titulo = titulo;
         this.contenido = contenido;
-    }
+    }*/
 
     public Nota(String id, String user_id, String titulo, String contenido) {
         this.id = id;

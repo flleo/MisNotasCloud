@@ -2,6 +2,7 @@ package utilidades.misnotas.persistence.sqlite;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -17,7 +18,7 @@ import static utilidades.misnotas.persistence.sqlite.NotasContract.*;
 
 public  class NotasDbHelper extends SQLiteOpenHelper {
 
-    public static final int DATABASE_VERSION = 35;
+    public static final int DATABASE_VERSION = 39;
     public  static final String DATABASE_NAME = "notas.db";
 
     public NotasDbHelper(@Nullable Context context) {
@@ -40,7 +41,7 @@ public  class NotasDbHelper extends SQLiteOpenHelper {
 
 
 
-    public  long save(Nota nota) throws SQLiteConstraintException {
+    public  long save(Nota nota) throws SQLException {
         SQLiteDatabase sqLiteDatabase = getWritableDatabase();
         return sqLiteDatabase.insert(NotaEntry.TABLE_NAME,null, nota.toContentValues());
     }
@@ -57,7 +58,7 @@ public  class NotasDbHelper extends SQLiteOpenHelper {
         return sqLiteDatabase.delete(NotaEntry.TABLE_NAME,"id = ?", ids);
     }
 
-    public ArrayList<Nota> getAll(String user_id) {
+    public ArrayList<Nota> getAll(String user_id) throws IllegalArgumentException {
         ArrayList<Nota> notas = new ArrayList<>();
         SQLiteDatabase sqLiteDatabase = getReadableDatabase();
         String[] parametros = {NotaEntry._ID,NotaEntry.ID,NotaEntry.USER_ID,NotaEntry.TITULO,NotaEntry.CONTENIDO};
@@ -82,8 +83,7 @@ public  class NotasDbHelper extends SQLiteOpenHelper {
                     notas.add(nota);
                 } while (cursor.moveToNext());
             cursor.close();
-        } catch (IllegalArgumentException e) {}
-
+        } catch (NullPointerException ignored) {}
         return notas;
     }
 

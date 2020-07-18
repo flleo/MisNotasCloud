@@ -23,7 +23,6 @@ import utilidades.misnotas.persistence.firebase.Firebase;
 import utilidades.misnotas.persistence.sqlite.NotasDbHelper;
 import utilidades.misnotas.utils.EncriptaDesencriptaAES;
 import utilidades.misnotas.utils.KeyboardUtil;
-import utilidades.misnotas.utils.LocalData;
 
 import static utilidades.misnotas.R.layout.fragment_nota;
 import static utilidades.misnotas.utils.LocalData.USER_ID;
@@ -36,11 +35,9 @@ public class NotaFragment extends Fragment {
     EditText contenidoET;
 
     EncriptaDesencriptaAES encriptaDesencriptaAES = new EncriptaDesencriptaAES();
-    LocalData localData;
     Bundle bundle;
     NotasDbHelper notasDbHelper;
     Nota nota = new Nota();
-    ListaFragment mFragment;
 
 
     @Override
@@ -49,9 +46,7 @@ public class NotaFragment extends Fragment {
             Bundle savedInstanceState
     ) {
         notasDbHelper = new NotasDbHelper(getContext());
-        localData = new LocalData(getContext());
-        nota.setUser_id(localData.getString(USER_ID));        //Para nueva nota
-
+        nota.setUser_id(USER_ID);        //Para nueva nota
 
         return inflater.inflate(fragment_nota, container, false);
     }
@@ -88,7 +83,7 @@ public class NotaFragment extends Fragment {
                     if (bundle != null) {
                         //Actualizamos
                         Log.e("actualizado id",String.valueOf(notaE.getId()));
-                            Firebase.update(notaE.getId(), notaE);
+                            Firebase.update(notaE);
                             Snackbar.make(view, "La nota se actualizó", Snackbar.LENGTH_SHORT)
                                     .setAction("", null).show();
 
@@ -98,7 +93,7 @@ public class NotaFragment extends Fragment {
                         String id;
                             id = Firebase.push();
                             notaE.setId(id);
-                            Firebase.update(id, notaE);
+                            Firebase.update(notaE);
                             Snackbar.make(view, "La nota fue añadida ", Snackbar.LENGTH_SHORT).setAction("", null).show();
                      //   }
                     }

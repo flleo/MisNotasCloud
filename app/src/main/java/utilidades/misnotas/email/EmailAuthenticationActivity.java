@@ -4,8 +4,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -31,15 +29,15 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import utilidades.misnotas.BuildConfig;
 import utilidades.misnotas.MainActivity;
 import utilidades.misnotas.R;
 import utilidades.misnotas.utils.KeyboardUtil;
 import utilidades.misnotas.utils.LocalData;
 import utilidades.misnotas.utils.NetworkUtil;
 
-import static utilidades.misnotas.utils.LocalData.TEMP_EMAIL_ID;
+import static utilidades.misnotas.utils.LocalData.EMAIL_ID;
 import static utilidades.misnotas.utils.LocalData.USER_ID;
+import static utilidades.misnotas.utils.LocalData.USER_IDs;
 
 
 public class EmailAuthenticationActivity extends AppCompatActivity {
@@ -48,15 +46,9 @@ public class EmailAuthenticationActivity extends AppCompatActivity {
     private static final String TAG = "EmailAuthenticationActivity";
     private FirebaseAuth mAuth;
     private ActionCodeSettings actionCodeSettings;
-    private FirebaseUser user;
-
+    LocalData localData;
     private EditText emailEt;
     private Button enviarB;
-    private View v;
-    Context context;
-    Activity activity;
-    LocalData localData;
-
     private String emailID = null, emailLink = null;
 
 
@@ -64,26 +56,19 @@ public class EmailAuthenticationActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_email_authentication);
-        activity = this;
-        localData = new LocalData(getApplicationContext());
 
         emailEt = findViewById(R.id.emailET);
         enviarB = findViewById(R.id.enviarEmailB);
 
-        //Si hemos cerrado sesion, inicializamos user_id a ''
-        Bundle bundle = getIntent().getExtras();
-        if(bundle!=null)
-            localData.setString(USER_ID,"");
+        localData = new LocalData(getApplicationContext());
 
-        //Iniciamos envio email
-        initFirebaseAuthentication();
-        escuchadorEnviarB();
-
-        //Al regresar despues de validar email, escuchamos
-        emailID = TEMP_EMAIL_ID;
-        if(emailID != "")
+        if(USER_ID == "" && EMAIL_ID != null) {
             escuchadorDynamicLink();
-
+        } else if(EMAIL_ID == null){
+            //Iniciamos envio email
+            initFirebaseAuthentication();
+            escuchadorEnviarB();
+        }
     }
 
     // Initialize Firebase Auth
@@ -91,10 +76,10 @@ public class EmailAuthenticationActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         actionCodeSettings =
                 ActionCodeSettings.newBuilder()
-                        .setUrl("https://misnotas-b6c56.firebaseapp.com/finishSignUp")
+                        .setUrl("https://misnotas-b6c56.firebaseapp.com/")
                         // This must be true
                         .setHandleCodeInApp(true)
-                        .setAndroidPackageName(BuildConfig.APPLICATION_ID, true, null)
+                        .setAndroidPackageName("utilidades.misnotas", true, null)
                         .build();
     }
 
@@ -116,8 +101,9 @@ public class EmailAuthenticationActivity extends AppCompatActivity {
                     KeyboardUtil.hideSoftKeyboard(EmailAuthenticationActivity.this);
                     Snackbar.make(v, "Enviando email...", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
+
                 } else {
-                    Snackbar.make(v, emailID + ", NO es un email válido.", Snackbar.LENGTH_LONG)
+                    Snackbar.make(v, emailID + " NO es un email válido.", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
                 }
             }
@@ -133,8 +119,7 @@ public class EmailAuthenticationActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             Snackbar.make(getCurrentFocus(), "Compruebe su email!", Snackbar.LENGTH_SHORT)
                                     .setAction("Action", null).show();
-                            localData.setString(TEMP_EMAIL_ID,emailID);
-
+                            EMAIL_ID = emailID;
                         } else {
                             Objects.requireNonNull(task.getException()).printStackTrace();
                             Snackbar.make(getCurrentFocus(), emailID + ", NO se envió, compruebe su acceso a internet.", Snackbar.LENGTH_LONG)
@@ -151,10 +136,9 @@ public class EmailAuthenticationActivity extends AppCompatActivity {
                     @SuppressLint("ResourceType")
                     @Override
                     public void onSuccess(PendingDynamicLinkData pendingDynamicLinkData) {
-                        // Get deep link from result (may be null if no link is found)
                         Uri deepLink = null;
                         if (pendingDynamicLinkData != null) {
-                          deepLink = pendingDynamicLinkData.getLink();
+                            deepLink = pendingDynamicLinkData.getLink();
                             emailLink = deepLink.toString();
                             escuchadorVerificacionEmailDelCliente();
                         }
@@ -170,20 +154,23 @@ public class EmailAuthenticationActivity extends AppCompatActivity {
 
     private void escuchadorVerificacionEmailDelCliente() {
         try {
-            mAuth.signInWithEmailLink(emailID, emailLink)
+            FirebaseAuth.getInstance().signInWithEmailLink(EMAIL_ID, emailLink)
                     .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
                                 if (task.getResult() != null && task.getResult().getUser() != null) {
-                                    user = task.getResult().getUser();
-                                    if (!TextUtils.isEmpty(user.getUid()))
-                                        localData.setString(USER_ID,user.getUid());
-                                        Intent intent = new Intent(activity, MainActivity.class);
+                                    FirebaseUser user = task.getResult().getUser();
+                                    if (!TextUtils.isEmpty(user.getUid())){
+                                        USER_ID = user.getUid();
+                                        localData.setString(USER_IDs, USER_ID);
+                                        Intent intent = new Intent(getApplication(), MainActivity.class);
                                         startActivity(intent);
+                                        finish();
+                                    }
                                 }
                             } else {
-                               NetworkUtil.isNetworkAvailable(context,true);
+                                NetworkUtil.isNetworkAvailable(getApplicationContext(),true);
                             }
                         }
                     });
@@ -192,7 +179,6 @@ public class EmailAuthenticationActivity extends AppCompatActivity {
                     .setAction("Action", null).show();
         }
     }
-
     @Override
     public void onBackPressed (){
         //Nothing to do
