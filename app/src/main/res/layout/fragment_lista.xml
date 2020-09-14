@@ -26,24 +26,19 @@
             android:layout_weight="1"
             android:background="@color/fondo"
             android:drawSelectorOnTop="false">
-
-
         </ListView>
-
-
     </LinearLayout>
-
-
 
     <Button
         android:id="@+id/nuevaNotaB"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/fab_margin"
-        android:background="@color/encabezado"
+        android:background="@drawable/radius"
         android:padding="@dimen/fab_padding"
         android:text="@string/nueva_nota"
         android:textColor="@color/letraBoton"
+        app:cornerRadius="17dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

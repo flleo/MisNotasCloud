@@ -59,7 +59,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/fab_margin"
-        android:background="@color/encabezado"
+        android:background="@drawable/radius"
         android:padding="@dimen/fab_padding"
         android:text="@string/mis_notas"
         android:textColor="@color/letraBoton"
