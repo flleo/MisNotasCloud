@@ -13,15 +13,18 @@ import android.view.MenuItem;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import utilidades.misnotas.email.EmailAuthenticationActivity;
+import utilidades.misnotas.fragment.ListaFragment;
+import utilidades.misnotas.fragment.NotaFragment;
 import utilidades.misnotas.utils.LocalData;
 import static utilidades.misnotas.utils.LocalData.USER_ID;
 import static utilidades.misnotas.utils.LocalData.USER_IDs;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity  {
 
 
     private static final String TAG = "MainActivity : ";
     LocalData localData;
+    ListaFragment listaFragment;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @SuppressLint("ResourceType")
@@ -37,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
             Intent mailIntent = new Intent(MainActivity.this, EmailAuthenticationActivity.class);
             startActivity(mailIntent);
         }
+
+
     }
 
     //Menu
@@ -66,7 +71,6 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
 
     @Override
     public void onBackPressed() {

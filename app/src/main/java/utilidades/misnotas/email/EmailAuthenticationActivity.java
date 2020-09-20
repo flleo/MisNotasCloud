@@ -1,11 +1,13 @@
 package utilidades.misnotas.email;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -22,15 +24,25 @@ import com.google.firebase.auth.ActionCodeSettings;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
 import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
 
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import utilidades.misnotas.MainActivity;
 import utilidades.misnotas.R;
+import utilidades.misnotas.model.Nota;
+import utilidades.misnotas.persistence.firebase.Firebase;
+import utilidades.misnotas.persistence.sqlite.NotasDbHelper;
+import utilidades.misnotas.utils.EncriptaDesencriptaAES;
 import utilidades.misnotas.utils.KeyboardUtil;
 import utilidades.misnotas.utils.LocalData;
 import utilidades.misnotas.utils.NetworkUtil;
@@ -50,7 +62,8 @@ public class EmailAuthenticationActivity extends AppCompatActivity {
     private EditText emailEt;
     private Button enviarB;
     private String emailID = null, emailLink = null;
-
+    EncriptaDesencriptaAES encriptaDesencriptaAES = new EncriptaDesencriptaAES();
+    NotasDbHelper notasDbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +74,7 @@ public class EmailAuthenticationActivity extends AppCompatActivity {
         enviarB = findViewById(R.id.enviarEmailB);
 
         localData = new LocalData(getApplicationContext());
+        notasDbHelper = new NotasDbHelper(this);
 
         if(USER_ID == "" && EMAIL_ID != null) {
             escuchadorDynamicLink();
@@ -164,6 +178,7 @@ public class EmailAuthenticationActivity extends AppCompatActivity {
                                     if (!TextUtils.isEmpty(user.getUid())){
                                         USER_ID = user.getUid();
                                         localData.setString(USER_IDs, USER_ID);
+
                                         Intent intent = new Intent(getApplication(), MainActivity.class);
                                         startActivity(intent);
                                         finish();
@@ -179,6 +194,9 @@ public class EmailAuthenticationActivity extends AppCompatActivity {
                     .setAction("Action", null).show();
         }
     }
+
+
+
     @Override
     public void onBackPressed (){
         //Nothing to do

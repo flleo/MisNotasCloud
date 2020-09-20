@@ -4,6 +4,10 @@ package utilidades.misnotas.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import java.util.ArrayList;
+
+import utilidades.misnotas.model.Nota;
+
 //Permite leer y escribir pares clave-valor persistentes de tipos de datos de primitivas: booleanos, floats, ints, longs y strings.
  public  class  LocalData {
     //En este caso van a coincidir TEMP_EMAIL_ID y USER_ID

@@ -3,13 +3,13 @@ package utilidades.misnotas.persistence.sqlite;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
-import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import java.security.AccessControlContext;
 import java.util.ArrayList;
 
 import utilidades.misnotas.model.Nota;

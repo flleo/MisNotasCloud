@@ -65,8 +65,6 @@ public class NotaFragment extends Fragment {
             nota.setUser_id(bundle.getString("user_id"));
             tituloET.setText(bundle.getString("titulo"));
             contenidoET.setText(bundle.getString("contenido"));
-        } else {
-
         }
 
         misNotasB.setOnClickListener(new View.OnClickListener() {
@@ -82,20 +80,24 @@ public class NotaFragment extends Fragment {
                     Nota notaE = encriptaDesencriptaAES.encriptacionAES(nota);
                     if (bundle != null) {
                         //Actualizamos
-                        Log.e("actualizado id",String.valueOf(notaE.getId()));
-                            Firebase.update(notaE);
+                        Log.e("actualizado id", String.valueOf(notaE.getId()));
+                        Firebase.update(notaE);
+                        if(notasDbHelper.update(nota) > 0){
                             Snackbar.make(view, "La nota se actualizó", Snackbar.LENGTH_SHORT)
                                     .setAction("", null).show();
+                        }
 
-                        //}
                     } else {
                         //Nueva nota
                         String id;
-                            id = Firebase.push();
-                            notaE.setId(id);
-                            Firebase.update(notaE);
+                        id = Firebase.push();Log.e("id",id);
+                        notaE.setId(id);
+                        Firebase.update(notaE);
+                        nota.setId(id);
+                        if(notasDbHelper.save(nota) != -1){
                             Snackbar.make(view, "La nota fue añadida ", Snackbar.LENGTH_SHORT).setAction("", null).show();
-                     //   }
+                        }
+
                     }
                 }
                 //Cambiamos a la vista listado
