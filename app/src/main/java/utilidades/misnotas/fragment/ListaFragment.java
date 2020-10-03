@@ -1,6 +1,7 @@
 package utilidades.misnotas.fragment;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -12,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -62,6 +64,7 @@ public class ListaFragment extends Fragment {
         listaFragment = this;
         notasDbHelper = new NotasDbHelper(getContext());
 
+
         return inflater.inflate(R.layout.fragment_lista, container, false);
     }
 
@@ -70,6 +73,7 @@ public class ListaFragment extends Fragment {
         //Recogemos las vistas
         notasLV = view.findViewById(R.id.notasLV);
         nuevaNotaB = view.findViewById(R.id.nuevaNotaB);
+
 
         //Llamamos nueva nota
         nuevaNotaB.setOnClickListener(new View.OnClickListener() {
@@ -115,6 +119,7 @@ public class ListaFragment extends Fragment {
 
         upload();
 
+
     }
 
 
@@ -139,12 +144,12 @@ public class ListaFragment extends Fragment {
                                             .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(DialogInterface dialog, int which) {
-                                                        Firebase.removeId(nota);
-                                                        if(notasDbHelper.delete(nota.getId()) > 0){
-                                                            adaptador();
-                                                            Snackbar.make(getView(), "La nota ha sido eliminada", Snackbar.LENGTH_SHORT)
-                                                                    .setAction("Action", null).show();
-                                                        }
+                                                    Firebase.removeId(nota);
+                                                    if (notasDbHelper.delete(nota.getId()) > 0) {
+                                                        adaptador();
+                                                        Snackbar.make(getView(), "La nota ha sido eliminada", Snackbar.LENGTH_SHORT)
+                                                                .setAction("Action", null).show();
+                                                    }
 
                                                 }
                                             })
@@ -175,7 +180,7 @@ public class ListaFragment extends Fragment {
 
     //Clase necesaria para que se grabe en firebase
     public void upload() {
-        if(USER_ID != ""){
+        if (USER_ID != "") {
             Firebase.databaseReference.child(USER_ID).orderByChild("titulo").addChildEventListener(new ChildEventListener() {
                 @RequiresApi(api = Build.VERSION_CODES.O)
                 @Override
@@ -183,35 +188,56 @@ public class ListaFragment extends Fragment {
                     if (dataSnapshot.getValue() != null) {
                         Nota nota = encriptaDesencriptaAES.desencriptaAES(dataSnapshot.getValue(Nota.class));
                         ArrayList<Nota> notas = notasDbHelper.getAll(USER_ID);
-                        int i=0;
-                        for (Nota n:notas)
-                            if(!n.getId().equals(nota.getId())) i++;
-                        if(i == notas.size())    {
-                            Log.e("i",String.valueOf(i));
+                        int i = 0;
+                        for (Nota n : notas) if (!n.getId().equals(nota.getId())) i++;
+                        if (i == notas.size()) {
+                            Log.e("i", String.valueOf(i));
                             notasDbHelper.save(nota);
+                            adaptador();
                         }
                     }
                 }
+
                 @RequiresApi(api = Build.VERSION_CODES.O)
                 @Override
                 public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                    if (dataSnapshot.getValue() != null) {
+                        Nota nota = encriptaDesencriptaAES.desencriptaAES(dataSnapshot.getValue(Nota.class));
+                        ArrayList<Nota> notas = notasDbHelper.getAll(USER_ID);
+                        for (Nota n : notas)
+                            if (n.getId().equals(nota.getId())) notasDbHelper.update(nota);
+                        adaptador();
+                    }
                 }
+
                 @Override
                 public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.getValue() != null) {
+                        Nota nota = dataSnapshot.getValue(Nota.class);
+                        for (Nota n : notas)
+                            if (n.getId().equals(nota.getId())) {
+                                notasDbHelper.delete(n.getId());
+                                adaptador();
+                            }
+                    }
                 }
+
                 @Override
                 public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
                 }
+
                 @Override
                 public void onCancelled(@NonNull DatabaseError databaseError) {
                 }
             });
-        } else Log.e(USER_ID,"NULLL");
+        } else Log.e(USER_ID, "NULLL");
 
         adaptador();
+
+
     }
 
-    public  void adaptador() {
+    public void adaptador() {
         notas = notasDbHelper.getAll(USER_ID);
         adaptador = new ArrayAdapter(getContext(), android.R.layout.simple_list_item_2, android.R.id.text1, notas) {
             @Override
@@ -229,6 +255,7 @@ public class ListaFragment extends Fragment {
             }
         };
         notasLV.setAdapter(adaptador);
+
     }
 
     private String contenido(int position) {
