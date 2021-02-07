@@ -1,6 +1,6 @@
 {
   "project_info": {
-    "project_number": "853691070722",
+    "project_number": "###############",
     "firebase_url": "https://misnotas-b6c56.firebaseio.com",
     "project_id": "misnotas-b6c56",
     "storage_bucket": "misnotas-b6c56.appspot.com"
@@ -8,35 +8,35 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:853691070722:android:6611ee24f7a0228106ea1b",
+        "mobilesdk_app_id": "###########################",
         "android_client_info": {
           "package_name": "utilidades.misnotas"
         }
       },
       "oauth_client": [
         {
-          "client_id": "853691070722-3jb7ir4e5utd5deio3vfmemqacbrjvru.apps.googleusercontent.com",
+          "client_id": "####################################",
           "client_type": 1,
           "android_info": {
             "package_name": "utilidades.misnotas",
-            "certificate_hash": "61440b7214a3cc803d82e7d8d613638c8e93830a"
+            "certificate_hash": "################################"
           }
         },
         {
-          "client_id": "853691070722-7hrdr7su7111efh44rl7el4ki00btdbe.apps.googleusercontent.com",
+          "client_id": "#################################.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAVXAG02BL_ZIe-phuyakTFLINPHHlL4Hs"
+          "current_key": "#################################"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "853691070722-7hrdr7su7111efh44rl7el4ki00btdbe.apps.googleusercontent.com",
+              "client_id": "#################################.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
